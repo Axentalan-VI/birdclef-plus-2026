@@ -1,0 +1,29 @@
+run_name: effnet_b0_fold0
+val_fold: 0
+seed: 42
+
+model_kind: timm
+backbone: tf_efficientnet_b0.ns_jft_in1k
+pretrained: true
+drop_rate: 0.2
+
+loss: bce          # or "focal"
+pos_weight_cap: 50
+focal_alpha: 0.25
+focal_gamma: 2.0
+
+epochs: 30
+batch_size: 64
+num_workers: 4
+lr: 3.0e-4
+weight_decay: 1.0e-4
+mixup_alpha: 0.5
+bg_mix_prob: 0.5
+
+spec_aug_enabled: true
+spec_aug:
+  time_masks: 2
+  time_mask_max: 40
+  freq_masks: 2
+  freq_mask_max: 16
+  time_shift_max: 20

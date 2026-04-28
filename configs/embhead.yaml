@@ -1,0 +1,15 @@
+run_name: embhead_fold0
+val_fold: 0
+seed: 42
+
+hidden: 512
+drop: 0.3
+
+loss: bce
+pos_weight_cap: 50
+
+epochs: 40
+batch_size: 256
+num_workers: 2
+lr: 1.0e-3
+weight_decay: 1.0e-4

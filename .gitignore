@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+cache/
+runs/
+outputs/
+kaggle_assets/*.onnx
+kaggle_assets/*.npz
+*.log
+.DS_Store
