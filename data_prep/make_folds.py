@@ -29,24 +29,36 @@ def site_from_filename(name: str) -> str:
 
 
 def build_folds(n_folds: int = DEFAULTS.num_folds, seed: int = DEFAULTS.seed) -> pd.DataFrame:
+    """Site-grouped K-fold that balances by *labeled segment count*, not file count.
+
+    Old version balanced files; with one site contributing ~10x more segments than
+    others the result was 7/6/6/7/40 files -> a useless 168-segment val set.
+    New version: weighted greedy by `n_segments` per site so val folds are even.
+    """
     labels = pd.read_csv(TRAIN_SS_LABELS_CSV)
-    files = labels["filename"].drop_duplicates().to_frame()
+    seg_per_file = labels.groupby("filename").size().rename("n_seg")
+    files = (
+        labels[["filename"]].drop_duplicates()
+        .merge(seg_per_file, left_on="filename", right_index=True)
+    )
     files["site"] = files["filename"].map(site_from_filename)
 
-    # Group files by site, distribute sites across folds by size (GroupKFold-ish).
-    site_counts = files.groupby("site").size().sort_values(ascending=False)
-    fold_sizes = np.zeros(n_folds, dtype=int)
+    # Aggregate by site so a single site cannot be split across folds.
+    site_seg = files.groupby("site")["n_seg"].sum().sort_values(ascending=False)
+
+    fold_seg = np.zeros(n_folds, dtype=float)
     site_to_fold: dict[str, int] = {}
     rng = np.random.default_rng(seed)
-    for site, n in site_counts.items():
-        # assign to fold with smallest current size; break ties randomly
-        order = np.argsort(fold_sizes + rng.random(n_folds) * 1e-6)
+    for site, n in site_seg.items():
+        # Greedy: assign to currently smallest fold; jitter for tie-break.
+        order = np.argsort(fold_seg + rng.random(n_folds) * 1e-3)
         f = int(order[0])
         site_to_fold[site] = f
-        fold_sizes[f] += int(n)
+        fold_seg[f] += float(n)
 
     files["fold"] = files["site"].map(site_to_fold)
-    return files.reset_index(drop=True)
+    files = files.reset_index(drop=True)
+    return files
 
 
 def main() -> None:

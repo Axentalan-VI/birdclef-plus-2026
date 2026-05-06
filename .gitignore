@@ -9,3 +9,5 @@ kaggle_assets/*.onnx
 kaggle_assets/*.npz
 *.log
 .DS_Store
+
+output/
