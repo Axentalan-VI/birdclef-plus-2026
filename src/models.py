@@ -8,7 +8,7 @@ import torch.nn as nn
 class TimmMelClassifier(nn.Module):
     """timm backbone on 1-channel log-mel input -> num_classes logits."""
 
-    def __init__(self, backbone: str = "tf_efficientnet_b0.ns_jft_in1k", num_classes: int = 234, pretrained: bool = True, drop_rate: float = 0.2):
+    def __init__(self, backbone: str = "tf_efficientnet_b0.ns_jft_in1k", num_classes: int = 234, pretrained: bool = True, drop_rate: float = 0.2, head_hidden: int = 512):
         super().__init__()
         import timm
         self.backbone = timm.create_model(
@@ -20,10 +20,19 @@ class TimmMelClassifier(nn.Module):
             drop_rate=drop_rate,
         )
         feat = self.backbone.num_features
-        self.head = nn.Sequential(
-            nn.Dropout(drop_rate),
-            nn.Linear(feat, num_classes),
-        )
+        if head_hidden > 0:
+            self.head = nn.Sequential(
+                nn.LayerNorm(feat),
+                nn.Linear(feat, head_hidden),
+                nn.GELU(),
+                nn.Dropout(drop_rate),
+                nn.Linear(head_hidden, num_classes),
+            )
+        else:
+            self.head = nn.Sequential(
+                nn.Dropout(drop_rate),
+                nn.Linear(feat, num_classes),
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:  # (B, 1, N_MELS, T)
         f = self.backbone(x)

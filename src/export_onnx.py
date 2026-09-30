@@ -15,8 +15,21 @@ from .taxonomy import num_classes
 
 def export_cnn(ckpt_path: Path, out_path: Path, backbone: str, opset: int = 17) -> Path:
     ckpt = torch.load(ckpt_path, map_location="cpu")
-    model = build_model("timm", backbone=backbone, num_classes=num_classes(), pretrained=False)
-    model.load_state_dict(ckpt["model"])
+    sd = ckpt["model"]
+    cfg = ckpt.get("cfg", {})
+    # Prefer backbone/head_hidden from the checkpoint cfg; fall back to argument/auto-detect.
+    backbone = cfg.get("backbone", backbone)
+    nc = num_classes()
+    if "head_hidden" in cfg:
+        head_hidden = int(cfg["head_hidden"])
+    else:
+        # Old single-linear head: head.1.weight has shape [nc, feat].
+        # New deep head:          head.1.weight has shape [hidden, feat].
+        h1 = sd.get("head.1.weight")
+        head_hidden = 0 if (h1 is None or h1.shape[0] == nc) else int(h1.shape[0])
+    model = build_model("timm", backbone=backbone, num_classes=nc, pretrained=False,
+                        head_hidden=head_hidden)
+    model.load_state_dict(sd)
     model.eval()
 
     dummy = torch.randn(1, 1, N_MELS, SPEC_FRAMES)
