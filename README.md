@@ -1,4 +1,4 @@
-﻿# BirdCLEF+ 2026
+# BirdCLEF+ 2026
 
 End-to-end solution for the [BirdCLEF+ 2026](https://www.kaggle.com/competitions/birdclef-2026)
 Kaggle competition: identify which of **234 bird, amphibian, mammal and insect species**
@@ -11,6 +11,11 @@ the **focal -> soundscape domain gap**.
 
 This repo runs **entirely on Kaggle** (the 16 GB dataset is never downloaded
 locally). Submissions must run on **CPU only, no internet, within 90 minutes**.
+
+## Result
+
+**0.819 macro ROC-AUC**, the best of 6 scored submissions. The competition is
+still running, so this is a work-in-progress score, not a final placement.
 
 ## Approach
 
