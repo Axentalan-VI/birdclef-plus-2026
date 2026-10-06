@@ -14,8 +14,8 @@ locally). Submissions must run on **CPU only, no internet, within 90 minutes**.
 
 ## Result
 
-**0.819 macro ROC-AUC**, the best of 6 scored submissions. The competition is
-still running, so this is a work-in-progress score, not a final placement.
+**0.819 macro ROC-AUC**, the best of 6 scored submissions. The competition closed
+on 2026-06-03, with a final standing of 3073 of 4094 teams.
 
 ## Approach
 
